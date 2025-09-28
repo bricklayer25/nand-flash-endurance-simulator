@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -6,33 +7,6 @@ NAND_TYPES = {
     "2": {"name": "MLC (Multi-Level Cell)", "mean": 10000, "std_dev": 1000},
     "3": {"name": "TLC (Triple-Level Cell)", "mean": 3000, "std_dev": 300},
 }
-
-
-def print_exposition(num_cells, mean_endurance, std_dev):
-    """Prints an introductory explanation of the simulation."""
-    print("=" * 70)
-    print("      NAND Flash Endurance Monte Carlo Simulator")
-    print("=" * 70)
-    print("\nThis script simulates the wear-out process of a block of NAND flash memory.")
-    print(f"It models {num_cells:,} individual cells, each with a unique endurance limit")
-    print(f"based on a normal distribution (Mean: {mean_endurance}, Std Dev: {std_dev}).\n")
-    
-    print("--- Key Concepts ---")
-    print(
-        "  - P/E Cycle (Program/Erase): The fundamental action of writing and erasing a\n"
-        "    NAND cell. This is the primary cause of wear."
-    )
-    print(
-        "  - Endurance: The total number of P/E cycles a cell can withstand before\n"
-        "    it is likely to fail and no longer reliably store data."
-    )
-    print(
-        "  - BER (Bit Error Rate): The key metric for memory reliability. It's the ratio\n"
-        "    of failed cells to the total number of cells."
-    )
-    print("    Formula: BER = (Number of Failed Cells) / (Total Number of Cells)\n")
-    
-    print("The simulation will now begin, applying P/E cycles and tracking the BER...\n")
     
 def run_simulation(num_cells, mean_endurance, std_dev, nand_name):
     """Runs a single NAND endurance simulation and returns the results."""
@@ -80,6 +54,23 @@ def plot_comparison_curves(results_dict):
     plt.xlabel('Program/Erase (P/E) Cycles', fontsize=12)
     plt.ylabel('Bit Error Rate (BER) - Log Scale', fontsize=12)
     plt.grid(True, which="both", linestyle='--')
+
+    # --- MODIFICATION START ---
+    
+    # Define the output directory
+    output_dir = 'results'
+    
+    # Create the directory if it doesn't already exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created directory: {output_dir}")
+    
+    # Save the figure to the specified directory
+    output_path = os.path.join(output_dir, 'nand_endurance_comparison.png')
+    plt.savefig(output_path, dpi=300)
+    print(f"Plot successfully saved to {output_path}")
+    
+    # --- MODIFICATION END ---
     plt.legend()
     plt.show()
 
@@ -105,5 +96,4 @@ if __name__ == "__main__":
         all_results[params['name']] = results
         
     # After all simulations are done, plot the final comparison graph
-    plt.savefig('nand_endurance_comparison.png', dpi=300)
     plot_comparison_curves(all_results)
