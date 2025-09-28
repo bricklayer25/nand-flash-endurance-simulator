@@ -1,6 +1,44 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+NAND_TYPES = {
+    "1": {"name": "SLC (Single-Level Cell)", "mean": 100000, "std_dev": 10000},
+    "2": {"name": "MLC (Multi-Level Cell)", "mean": 10000, "std_dev": 1000},
+    "3": {"name": "TLC (Triple-Level Cell)", "mean": 3000, "std_dev": 300},
+}
+
+def get_simulation_parameters():
+    """Gets simulation parameters from the user via an interactive menu."""
+    print("--- Configure Your Simulation ---")
+    
+    # Let the user choose the NAND type
+    while True:
+        print("Please select a NAND flash type to simulate:")
+        for key, value in NAND_TYPES.items():
+            print(f"  {key}: {value['name']}")
+        
+        choice = input("Enter your choice (1, 2, or 3): ")
+        if choice in NAND_TYPES:
+            selected_nand = NAND_TYPES[choice]
+            break
+        else:
+            print("\n*** Invalid choice. Please try again. ***\n")
+            
+    # Let the user choose the number of cells
+    while True:
+        try:
+            num_cells_str = input(f"Enter the number of cells to simulate (e.g., 10000): ")
+            num_cells = int(num_cells_str)
+            if num_cells > 0:
+                break
+            else:
+                print("\n*** Please enter a positive number. ***\n")
+        except ValueError:
+            print("\n*** Invalid input. Please enter a whole number. ***\n")
+            
+    print("-" * 33 + "\n")
+    return num_cells, selected_nand['mean'], selected_nand['std_dev'], selected_nand['name']
+
 def print_exposition(num_cells, mean_endurance, std_dev):
     """Prints an introductory explanation of the simulation."""
     print("=" * 70)
@@ -32,9 +70,7 @@ def print_exposition(num_cells, mean_endurance, std_dev):
 # ===================================================================
 
 # Define simulation parameters for TLC NAND
-num_cells = 10000
-mean_endurance = 3000
-std_dev = 300
+num_cells, mean_endurance, std_dev, nand_name = get_simulation_parameters()
 
 #--------------Exposition-------------------
 print_exposition(num_cells, mean_endurance, std_dev)
@@ -57,7 +93,12 @@ plt.show() # This will display the histogram first
 # ===================================================================
 
 # Define the maximum number of cycles to simulate
-max_cycles = 5000
+max_cycles = mean_endurance + (4 * std_dev)
+
+# ---Calculate a dynamic reporting interval to get 10 updates ---
+reporting_interval = max(1, max_cycles // 10)
+# 'max(1, ...)' ensures the interval is at least 1, preventing errors on very short simulations.
+# ---------------------------------------------------------------
 
 # Initialize an array to track P/E counts for each cell
 p_e_counts = np.zeros(num_cells, dtype=int)
@@ -75,7 +116,7 @@ for cycle in range(1, max_cycles + 1):
     ber = num_failed / num_cells # Calculate BER
     results_log.append((cycle, ber)) # Log data
     
-    if cycle % 500 == 0:
+    if cycle % reporting_interval == 0:
         print(f"Cycle {cycle}/{max_cycles} | Failed Cells: {num_failed} | BER: {ber:.6f}")
 
 print("Simulation finished.")
