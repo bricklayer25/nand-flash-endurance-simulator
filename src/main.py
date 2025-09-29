@@ -54,8 +54,6 @@ def plot_comparison_curves(results_dict):
     plt.xlabel('Program/Erase (P/E) Cycles', fontsize=12)
     plt.ylabel('Bit Error Rate (BER) - Log Scale', fontsize=12)
     plt.grid(True, which="both", linestyle='--')
-
-    # --- MODIFICATION START ---
     
     # Define the output directory
     output_dir = 'results'
@@ -70,7 +68,6 @@ def plot_comparison_curves(results_dict):
     plt.savefig(output_path, dpi=300)
     print(f"Plot successfully saved to {output_path}")
     
-    # --- MODIFICATION END ---
     plt.legend()
     plt.show()
 
